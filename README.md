@@ -150,3 +150,6 @@ technologie similaire) est tolérée, à condition que vous indiquiez clairement
 Bon courage ! L’objectif principal n’est pas d’obtenir la meilleure accuracy, mais de comprendre les
 mécanismes de l’apprentissage profond et de justifier vos choix.
 5
+
+
+Restart and Run

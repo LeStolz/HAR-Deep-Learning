@@ -5,6 +5,7 @@ PROCESSED_DIR = os.path.join("data", "processed")
 
 
 def set_seed(seed=42):
+    os.environ["PYTHONHASHSEED"] = str(seed)
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -13,6 +14,8 @@ def set_seed(seed=42):
         torch.cuda.manual_seed_all(seed)
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
+
+    torch.use_deterministic_algorithms(True, warn_only=True)
 
 
 def load_data():
@@ -134,13 +137,18 @@ def train_model(
         history["val_f1"].append(v_f1)
         history["grad_norms"] += grad_norms
 
-        if v_loss < best_v_loss:
+        if early_stopping_patience is not None:
+            if v_loss < best_v_loss:
+                best_v_loss = v_loss
+                best_state = copy.deepcopy(model.state_dict())
+                best_epoch = epoch
+                wait = 0
+            else:
+                wait += 1
+        else:
             best_v_loss = v_loss
             best_state = copy.deepcopy(model.state_dict())
             best_epoch = epoch
-            wait = 0
-        else:
-            wait += 1
 
         if verbose_every and (epoch % verbose_every == 0 or epoch == 1 or epoch == n_epochs):
             print(f"Epoch {epoch:02d}/{n_epochs:02d} | "
